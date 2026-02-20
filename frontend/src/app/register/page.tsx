@@ -5,16 +5,27 @@ import { useRouter } from 'next/navigation';
 import { Button, Input } from '@/components';
 import { saveAuth, getStoredToken } from '@/lib/auth';
 import type { AuthUser } from '@/lib/auth';
-import Link from 'next/link';
-import { ArrowLeft, UserPlus } from 'lucide-react';
 
 const BASE_URL =
   typeof process !== 'undefined' && process.env.NEXT_PUBLIC_API_URL
     ? process.env.NEXT_PUBLIC_API_URL
     : 'http://localhost:4000';
 
-function validate(email: string, password: string) {
-  const errors: { email?: string; password?: string } = {};
+interface FieldErrors {
+  name?: string;
+  email?: string;
+  password?: string;
+  confirmPassword?: string;
+}
+
+function validate(name: string, email: string, password: string, confirmPassword: string): FieldErrors {
+  const errors: FieldErrors = {};
+
+  if (!name.trim()) {
+    errors.name = 'El nombre es requerido';
+  } else if (name.trim().length < 2) {
+    errors.name = 'El nombre debe tener al menos 2 caracteres';
+  }
 
   if (!email.trim()) {
     errors.email = 'El correo electrónico es requerido';
@@ -24,23 +35,30 @@ function validate(email: string, password: string) {
 
   if (!password) {
     errors.password = 'La contraseña es requerida';
-  } else if (password.length < 6) {
-    errors.password = 'La contraseña debe tener al menos 6 caracteres';
+  } else if (password.length < 8) {
+    errors.password = 'La contraseña debe tener al menos 8 caracteres';
+  }
+
+  if (!confirmPassword) {
+    errors.confirmPassword = 'Confirma tu contraseña';
+  } else if (confirmPassword !== password) {
+    errors.confirmPassword = 'Las contraseñas no coinciden';
   }
 
   return errors;
 }
 
-export default function LoginPage() {
+export default function RegisterPage() {
   const router = useRouter();
 
+  const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [apiError, setApiError] = useState<string | null>(null);
-  const [fieldErrors, setFieldErrors] = useState<{ email?: string; password?: string }>({});
+  const [fieldErrors, setFieldErrors] = useState<FieldErrors>({});
 
-  // If already authenticated, skip to dashboard
   useEffect(() => {
     if (getStoredToken()) router.replace('/dashboard');
   }, [router]);
@@ -48,7 +66,7 @@ export default function LoginPage() {
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
 
-    const errors = validate(email, password);
+    const errors = validate(name, email, password, confirmPassword);
     setFieldErrors(errors);
     if (Object.keys(errors).length > 0) return;
 
@@ -56,28 +74,34 @@ export default function LoginPage() {
     setApiError(null);
 
     try {
-      const res = await fetch(`${BASE_URL}/api/auth/login`, {
+      const res = await fetch(`${BASE_URL}/api/auth/register`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email: email.trim(), password }),
+        body: JSON.stringify({ name: name.trim(), email: email.trim(), password }),
       });
 
       const body = await res.json();
 
       if (!res.ok) {
-        setApiError(body.error ?? 'Credenciales incorrectas');
+        setApiError(
+          res.status === 409
+            ? 'Este correo ya está registrado.'
+            : (body.error ?? 'No se pudo crear la cuenta.')
+        );
         return;
       }
 
       saveAuth(body.token as string, body.user as AuthUser);
       router.replace('/dashboard');
     } catch {
-      setApiError(
-        'No se pudo conectar al servidor. Verifica que el backend esté en ejecución.'
-      );
+      setApiError('No se pudo conectar al servidor. Verifica que el backend esté en ejecución.');
     } finally {
       setLoading(false);
     }
+  }
+
+  function clearError(field: keyof FieldErrors) {
+    setFieldErrors((prev) => ({ ...prev, [field]: undefined }));
   }
 
   return (
@@ -96,26 +120,35 @@ export default function LoginPage() {
           </span>
         </div>
         <p className="text-sm text-gray-500 font-[var(--font-inter)]">
-          Dashboard de métricas
+          Dashboard de Métricas
         </p>
       </div>
 
       {/* Card */}
       <div className="w-full max-w-sm bg-white rounded-xl border border-gray-200 shadow-sm p-8">
         <h1 className="text-xl font-bold text-gray-900 mb-6 font-[var(--font-inter)]">
-          Iniciar sesión
+          Crear cuenta
         </h1>
 
         <form onSubmit={handleSubmit} noValidate className="space-y-4 font-[var(--font-inter)]">
+          <Input
+            type="text"
+            label="Nombre"
+            placeholder="Tu nombre"
+            value={name}
+            onChange={(e) => { setName(e.target.value); clearError('name'); }}
+            validationState={fieldErrors.name ? 'error' : 'default'}
+            errorMessage={fieldErrors.name}
+            disabled={loading}
+            autoComplete="name"
+          />
+
           <Input
             type="email"
             label="Correo electrónico"
             placeholder="tu@empresa.com"
             value={email}
-            onChange={(e) => {
-              setEmail(e.target.value);
-              if (fieldErrors.email) setFieldErrors((p) => ({ ...p, email: undefined }));
-            }}
+            onChange={(e) => { setEmail(e.target.value); clearError('email'); }}
             validationState={fieldErrors.email ? 'error' : 'default'}
             errorMessage={fieldErrors.email}
             disabled={loading}
@@ -125,16 +158,25 @@ export default function LoginPage() {
           <Input
             type="password"
             label="Contraseña"
-            placeholder="Tu contraseña"
+            placeholder="Mínimo 8 caracteres"
             value={password}
-            onChange={(e) => {
-              setPassword(e.target.value);
-              if (fieldErrors.password) setFieldErrors((p) => ({ ...p, password: undefined }));
-            }}
+            onChange={(e) => { setPassword(e.target.value); clearError('password'); }}
             validationState={fieldErrors.password ? 'error' : 'default'}
             errorMessage={fieldErrors.password}
             disabled={loading}
-            autoComplete="current-password"
+            autoComplete="new-password"
+          />
+
+          <Input
+            type="password"
+            label="Confirmar contraseña"
+            placeholder="Repite tu contraseña"
+            value={confirmPassword}
+            onChange={(e) => { setConfirmPassword(e.target.value); clearError('confirmPassword'); }}
+            validationState={fieldErrors.confirmPassword ? 'error' : 'default'}
+            errorMessage={fieldErrors.confirmPassword}
+            disabled={loading}
+            autoComplete="new-password"
           />
 
           {apiError && (
@@ -151,51 +193,19 @@ export default function LoginPage() {
             size="lg"
             loading={loading}
             className="w-full justify-center mt-2"
-            trackingName="login-submit"
+            trackingName="register-submit"
           >
-            {loading ? 'Iniciando sesión…' : 'Iniciar sesión'}
+            {loading ? 'Creando cuenta…' : 'Crear cuenta'}
           </Button>
         </form>
 
-        {/* Demo credentials hint */}
-        <div className="mt-6 p-3 rounded-lg bg-gray-50 border border-gray-200 cursor-pointer">
-          <p className="text-[10px] font-semibold uppercase tracking-widest text-gray-400 mb-2">
-            Credenciales de prueba
-          </p>
-          <button
-            type="button"
-            className="text-left w-full group"
-            onClick={() => {
-              setEmail('morenoestradasantiago@gmail.com');
-              setPassword('password123');
-              setFieldErrors({});
-              setApiError(null);
-            }}
-          >
-            <p className="text-xs text-gray-600 group-hover:text-blue-600 transition-colors cursor-pointer">
-              morenoestradasantiago@gmail.com
-            </p>
-            <p className="text-xs text-gray-400 group-hover:text-blue-400 transition-colors">
-              password123
-            </p>
-          </button>
-        </div>
+        <p className="mt-6 text-center text-xs text-gray-400 font-[var(--font-inter)]">
+          ¿Ya tienes cuenta?{' '}
+          <a href="/login" className="text-blue-600 hover:underline">
+            Inicia sesión
+          </a>
+        </p>
       </div>
-
-      <footer className="my-4 flex flex-col gap-2">
-        <Link href="/" className="text-xs text-gray-600 hover:text-blue-600 transition-colors flex flex-row gap-2 items-center">
-          <ArrowLeft className="w-3.5 h-3.5" />
-          <span className="hover:underline">
-            Regresar a la página principal
-          </span>
-        </Link>
-        <Link href="/register" className="text-xs text-gray-600 hover:text-blue-600 transition-colors flex flex-row gap-2 items-center">
-          <UserPlus className="w-3.5 h-3.5" />
-          <span className="hover:underline">
-            No tienes una cuenta? Regístrate
-          </span>
-        </Link>
-      </footer>
     </div>
   );
 }
