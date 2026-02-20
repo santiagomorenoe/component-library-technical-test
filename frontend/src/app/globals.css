@@ -39,8 +39,8 @@ body {
 }
 
 ::selection {
-  background-color: var(--white);
-  color: var(--primary);
+  background-color: var(--primary);
+  color: var(--white);
 }
 
 html {

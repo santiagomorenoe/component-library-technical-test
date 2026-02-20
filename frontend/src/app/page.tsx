@@ -1,9 +1,10 @@
 'use client';
 
 import { useState } from 'react';
-import { ArrowDown, Github, Zap, Shield, BarChart2, Mail, ArrowRight, ChevronRight } from 'lucide-react';
-import { Button, Input, Modal, Card, ExportButton } from '@/components';
+import { ArrowDown, Github, Zap, Shield, BarChart2, Mail, ArrowRight, ChevronRight, LayoutDashboard } from 'lucide-react';
+import { Button, Input, Modal, Card } from '@/components';
 import { motion } from 'framer-motion';
+import { useRouter } from 'next/navigation';
 
 
 type ActiveModal = {
@@ -27,65 +28,94 @@ export default function Home() {
     }
   }
 
+  const router = useRouter();
+
   return (
     <div className="min-h-screen">
-      <div className="max-w-7xl mx-auto px-4 py-20 text-center">
-        <div
-          className="absolute inset-0 z-0"
+
+      <header className="bg-white border-b border-gray-200 sticky top-0 z-30">
+        <div className="max-w-6xl mx-auto px-4 h-14 flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <span
+              className="w-7 h-7 rounded-md flex items-center justify-center text-white text-xs font-bold shrink-0"
+              style={{ backgroundColor: 'var(--primary)' }}
+            >
+              T1
+            </span>
+            <span className="font-bold text-gray-900">T1 UI</span>
+            <span className="hidden sm:block text-gray-300 mx-1">·</span>
+            <span className="hidden sm:block text-sm text-gray-500">Santiago Moreno | System Design con Telemetría</span>
+          </div>
+
+          <div className="flex items-center gap-3">
+            <Button
+              size="sm"
+              variant="secondary"
+              icon={<LayoutDashboard className="w-3.5 h-3.5" />}
+              trackingName="home-dashboard"
+              onClick={() => router.push('/dashboard')}
+            >
+              Ir al dashboard
+            </Button>
+          </div>
+        </div>
+      </header>
+
+      <div className="text-center">
+
+        <div className="absolute inset-0 bg-[linear-gradient(to_right,#8882_1px,transparent_1px),linear-gradient(to_bottom,#8882_1px,transparent_1px)] bg-[size:16px_16px] opacity-15" />
+
+        <div className="relative z-10 px-4 sm:px-6 lg:px-8 lg:py-32"
           style={{
             background: "radial-gradient(125% 125% at 50% 10%, #fff 40%, #D93927 100%)",
           }}
-        />
-        <div className="w-full overflow-hidden b">
-
-          <div className="absolute inset-0 bg-[linear-gradient(to_right,#8882_1px,transparent_1px),linear-gradient(to_bottom,#8882_1px,transparent_1px)] bg-[size:16px_16px] opacity-15" />
-          <div className="relative z-10 container mx-auto px-4 sm:px-6 lg:px-8 lg:py-32">
-
-            <div className="mx-auto max-w-5xl">
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.5 }}
-                className="mx-auto mb-6 flex justify-center"
-              >
-                <div className="bg-black inline-flex items-center rounded-full px-3 py-1 text-sm backdrop-blur-sm">
-                  <span className="text-white">
-                    Presentando nuestra librería de componentes T1
-                  </span>
-                  <ChevronRight className="text-white ml-1 h-4 w-4" />
-                </div>
-              </motion.div>
-              <motion.h1
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.5, delay: 0.1 }}
-                className="from-primary/70 via-black/85 to-primary bg-gradient-to-tl bg-clip-text text-center text-4xl tracking-tighter text-balance text-transparent sm:text-5xl md:text-6xl lg:text-7xl"
-              >
-                Construye interfaces hermosas con velocidad y precisión con T1
-              </motion.h1>
-              <motion.p
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.5, delay: 0.2 }}
-                className="text-black mx-auto mt-6 max-w-2xl text-center text-lg"
-              >
-                Una librería de componentes UI moderna diseñada para ayudar a los desarrolladores a crear aplicaciones web hermosas con el mínimo esfuerzo. Totalmente personalizable, responsive y accesible.
-              </motion.p>
-
-              <div className="flex justify-center gap-8 pt-4">
-                <Button variant="primary" trackingName="hero-start" className="bg-primary" icon={<ArrowDown className="w-4 h-4" />} onClick={handleScrollToShowcase}>
-                  Explorar componentes
-                </Button>
-                <Button variant="secondary" trackingName="hero-github" icon={<Github className="w-4 h-4" />} onClick={() => window.open('https://github.com/t1-ui/t1', '_blank')}>
-                  GitHub
-                </Button>
+        >
+          <div className="mx-auto max-w-5xl py-20">
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5 }}
+              className="mx-auto mb-6 flex justify-center"
+            >
+              <div className="bg-black inline-flex items-center rounded-full px-3 py-1 text-sm backdrop-blur-sm">
+                <span className="text-white">
+                  Nuestra librería de componentes
+                </span>
+                <ChevronRight className="text-white ml-1 h-4 w-4" />
               </div>
+            </motion.div>
+            <motion.h1
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: 0.1 }}
+              className="from-primary/70 via-black/85 to-primary bg-gradient-to-tl bg-clip-text text-center text-4xl tracking-tighter text-balance text-transparent sm:text-5xl md:text-6xl lg:text-7xl"
+            >
+              Construye interfaces hermosas con velocidad y precisión con T1
+            </motion.h1>
+            <motion.p
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: 0.2 }}
+              className="text-black mx-auto mt-6 max-w-2xl text-center text-lg"
+            >
+              Componentes UI de T1, diseñada para ayudar a los desarrolladores a crear aplicaciones rapidamente.
+              Totalmente personalizable, responsive y accesible.
+            </motion.p>
+
+            <div className="flex justify-center gap-8 py-4">
+              <Button variant="primary" trackingName="hero-start" className="bg-primary hover:bg-primary/80" icon={<ArrowDown className="w-4 h-4" />} onClick={handleScrollToShowcase}>
+                Explorar
+              </Button>
+              <Button variant="secondary" className="hover:bg-gray-100" trackingName="hero-github" icon={<Github className="w-4 h-4" />} onClick={() => window.open('https://github.com/santiagomorenoe/component-library-technical-test', '_blank')}>
+                GitHub
+              </Button>
             </div>
           </div>
+
         </div>
       </div>
 
-      <div className="max-w-7xl relative z-10 mx-auto px-4 grid sm:grid-cols-3 gap-4">
+      <div className="max-w-7xl mx-auto px-4 grid mt-12 sm:grid-cols-3 gap-4">
         {[
           {
             icon: <Zap className="w-5 h-5 text-primary" />,
@@ -347,37 +377,6 @@ export default function Home() {
             >
               Abrir Large
             </Button>
-          </div>
-        </section>
-
-        {/* ── ExportButton ──────────────────────────────────────────────────── */}
-        <section>
-          <SectionHeader
-            tag="ExportButton"
-            title="ExportButton"
-            description="Descarga los datos de tracking como CSV (datos crudos) o JSON (con metadatos). Ambos endpoints requieren autenticación."
-          />
-
-          <div className="bg-white rounded-lg border border-gray-200 px-5 py-6 space-y-5">
-            {/* Without token — shows error state */}
-            <div>
-              <p className="text-[10px] font-semibold uppercase tracking-widest text-gray-400 mb-3">
-                Sin token (muestra error de autenticación)
-              </p>
-              <ExportButton trackingName="sc-export-no-token" />
-            </div>
-
-            {/* With token — simulated */}
-            <div>
-              <p className="text-[10px] font-semibold uppercase tracking-widest text-gray-400 mb-3">
-                Con token y filtros por componente
-              </p>
-              <ExportButton
-                token="demo-token"
-                filters={{ componentName: 'Button' }}
-                trackingName="sc-export-with-token"
-              />
-            </div>
           </div>
         </section>
       </main>
