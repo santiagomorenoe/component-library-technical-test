@@ -100,3 +100,23 @@ npm run seed
 ```
 
 Esto crea el usuario `morenoestradasantiago@gmail.com` con password `password123`.
+
+---
+
+## Tests
+
+Los tests cubren los 5 componentes del design system: Button, Input, Modal, Card y ExportButton, ademas de un suite de integracion que valida que el tracker envie los eventos correctamente al endpoint de la API.
+
+```bash
+cd frontend
+
+# Correr todos los tests
+npm test
+
+# Con reporte de cobertura
+npm test -- --coverage
+```
+
+**Resultado actual: 76 tests, 6 suites, cobertura ~95-100% en todos los componentes.**
+
+Se usa Jest con `@testing-library/react` (compatible con React 19). Cada componente tiene pruebas de renderizado, variantes, estados, interacciones y eventos de tracking. La cobertura minima configurada es 80% en branches, funciones, lineas y statements.
